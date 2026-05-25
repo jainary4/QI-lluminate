@@ -350,7 +350,7 @@ def run_full_pipeline(M: int, Kappa: float, Nbar: float,
     
 
 @app.local_entrypoint()
-def main(m: int = 2, kappa: float = 0.05, nbar: float = 0.5, nmax: int = 2, k_samples: int = 1000,):
+def main(m: int = 6, kappa: float = 0.05, nbar: float = 0.5, nmax: int = 2, k_samples: int = 1000):
     print(f"Running with M={m}, Kappa={kappa}, Nbar={nbar}, Nmax={nmax}, K_samples={k_samples}")
     metadata = run_full_pipeline.remote(m, kappa, nbar, nmax, k_samples)
     print("metadata: ", metadata)

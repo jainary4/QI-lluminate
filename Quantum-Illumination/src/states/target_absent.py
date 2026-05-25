@@ -142,8 +142,8 @@ def check_correlations(rho_joint, dims):
 
 if __name__ == "__main__":
     # --- INPUTS ---
-    M = 2              # Number of mode pairs
-    Nmax = 2           # Max photons per mode
+    M = 5             # Number of mode pairs
+    Nmax = 5           # Max photons per mode
     Nbar = 0.5         # Noise brightness
     
     # Run Generation
