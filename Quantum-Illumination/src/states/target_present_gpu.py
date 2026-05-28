@@ -1,4 +1,11 @@
 import modal
+import cupy as cp
+import numpy as np
+import itertools
+import time
+from scipy.linalg import expm
+from pathlib import Path
+import json
 
 app = modal.App("quantum-illumination")  # NOT Stub
 
@@ -19,17 +26,10 @@ timeout=1500,
 cpu= 1,
 volumes={"/vol/qi": modal.Volume.from_name("qi-results", create_if_missing=True)}
 )
-def run_full_pipeline(M: int, Kappa: float, Nbar: float,
-                      Nmax: int, K_samples: int):
-    import cupy as cp
-    import numpy as np
-    import itertools
-    import time
-    from scipy.linalg import expm
-    from pathlib import Path
-    import json
+def run_full_pipeline(M: int, Kappa: float, Nbar: float, Nmax: int, K_samples: int):
 
-    def bose_einstein_pmf(n, nbar):
+
+    def bose_einstein_pmf(n: int, nbar: float) -> float:
         """
         Bose‑Einstein probability mass function for a single thermal mode.
 
@@ -49,7 +49,7 @@ def run_full_pipeline(M: int, Kappa: float, Nbar: float,
 
 
 
-    def thermal_distribution(nbar, Nmax):
+    def thermal_distribution(nbar: float, Nmax: int) -> np.ndarray:
         """
         Normalised thermal photon‑number distribution truncated to [0, Nmax].
 
@@ -71,7 +71,7 @@ def run_full_pipeline(M: int, Kappa: float, Nbar: float,
         return probs
 
 
-    def sample_environment(M, nbar, Nmax):
+    def sample_environment(M: int, nbar: float, Nmax: int) -> np.ndarray:
         """
         Draw one configuration of thermal noise for all M environment modes.
 
@@ -96,7 +96,7 @@ def run_full_pipeline(M: int, Kappa: float, Nbar: float,
 
 
 
-    def beam_splitter_fock(nS, nE, eta, Nmax):
+    def beam_splitter_fock(nS: int, nE: int, eta: float, Nmax: int) -> Dict[Tuple[int, int], complex]:
         """
         Compute the exact output state of a beam splitter acting on Fock states.
 
@@ -144,7 +144,7 @@ def run_full_pipeline(M: int, Kappa: float, Nbar: float,
 
 
 
-    def compute_v_states(n_env, eta, Nmax):
+    def compute_v_states(n_env: int, eta: float, Nmax: int) -> Tuple[Dict, Dict]:
         """
         Compute the two possible local output states for a given environment photon count.
 
@@ -170,7 +170,7 @@ def run_full_pipeline(M: int, Kappa: float, Nbar: float,
 
 
 
-    def local_bs_data(n_vec, eta, Nmax):
+    def local_bs_data(n_vec: np.ndarray, eta: float, Nmax: int) -> Tuple[List[Dict], List[Dict]]:
         """
         Apply the beam‑splitter interaction to every mode for one environment sample.
 
@@ -200,7 +200,7 @@ def run_full_pipeline(M: int, Kappa: float, Nbar: float,
        
 
     
-    def compute_mode_sigmas(v0_dict, v1_dict, d):
+    def compute_mode_sigmas(v0_dict: Dict[Tuple[int, int], complex],v1_dict: Dict[Tuple[int, int], complex],d: int) -> Dict[Tuple[int, int], np.ndarray]:
         """
         Convert local beam‑splitter output states for one mode into the four
         reduced sigma matrices (partial traces over the environment).
@@ -350,7 +350,7 @@ def run_full_pipeline(M: int, Kappa: float, Nbar: float,
     
 
 @app.local_entrypoint()
-def main(m: int = 6, kappa: float = 0.05, nbar: float = 0.5, nmax: int = 2, k_samples: int = 1000):
+def main(m: int = 7, kappa: float = 0.05, nbar: float = 0.5, nmax: int = 2, k_samples: int = 1000):
     print(f"Running with M={m}, Kappa={kappa}, Nbar={nbar}, Nmax={nmax}, K_samples={k_samples}")
     metadata = run_full_pipeline.remote(m, kappa, nbar, nmax, k_samples)
     print("metadata: ", metadata)
